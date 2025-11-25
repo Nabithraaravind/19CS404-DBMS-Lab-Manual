@@ -1,652 +1,352 @@
-# Experiment 4: Aggregate Functions, Group By and Having Clause
+# Experiment 5: Subqueries and Views
 
 ## AIM
-To study and implement aggregate functions, GROUP BY, and HAVING clause with suitable examples.
+To study and implement subqueries and views.
 
 ## THEORY
 
-### Aggregate Functions
-These perform calculations on a set of values and return a single value.
+### Subqueries
+A subquery is a query inside another SQL query and is embedded in:
+- WHERE clause
+- HAVING clause
+- FROM clause
 
-- **MIN()** – Smallest value  
-- **MAX()** – Largest value  
-- **COUNT()** – Number of rows  
-- **SUM()** – Total of values  
-- **AVG()** – Average of values
+**Types:**
+- **Single-row subquery**:
+  Sub queries can also return more than one value. Such results should be made use along with the operators in and any.
+- **Multiple-row subquery**:
+  Here more than one subquery is used. These multiple sub queries are combined by means of ‘and’ & ‘or’ keywords.
+- **Correlated subquery**:
+  A subquery is evaluated once for the entire parent statement whereas a correlated Sub query is evaluated once per row processed by the parent statement.
 
-**Syntax:**
+**Example:**
 ```sql
-SELECT AGG_FUNC(column_name) FROM table_name WHERE condition;
+SELECT * FROM employees
+WHERE salary > (SELECT AVG(salary) FROM employees);
 ```
-### GROUP BY
-Groups records with the same values in specified columns.
-**Syntax:**
+### Views
+A view is a virtual table based on the result of an SQL SELECT query.
+**Create View:**
 ```sql
-SELECT column_name, AGG_FUNC(column_name)
-FROM table_name
-GROUP BY column_name;
+CREATE VIEW view_name AS
+SELECT column1, column2 FROM table_name WHERE condition;
 ```
-### HAVING
-Filters the grouped records based on aggregate conditions.
-**Syntax:**
+**Drop View:**
 ```sql
-SELECT column_name, AGG_FUNC(column_name)
-FROM table_name
-GROUP BY column_name
-HAVING condition;
+DROP VIEW view_name;
 ```
 
 **Question 1**
 --
-What is the average dosage prescribed for each medication?
-
-Sample tablePrescriptions Table
-```
-Medication     AvgDosage
--------------  ----------
-Ciprofloxacin  500.0
-Doxorubicin    60.0
-Ibuprofen      400.0
-Levothyroxine  50.0
-Lisinopril     10.0
-MMR            0.5
-Pending        0.0
-Prenatal vita  1.0
-Sertraline     50.0
-Topiramate     25.0
-```
+Write a SQL query that retrieve all the columns from the table "Grades", where the grade is equal to the maximum grade achieved in each subject. Sample table: GRADES (attributes: student_id, student_name, subject, grade)
 
 ```sql
-SELECT
-  Medication,
-  AVG(Dosage) AS AvgDosage
-FROM
-  Prescriptions
-GROUP BY
-  Medication;
+SELECT *
+FROM GRADES g
+WHERE grade = (
+    SELECT MAX(grade)
+    FROM GRADES
+    WHERE subject = g.subject
+);
 
 ```
 
 **Output:**
 
-<img width="695" height="742" alt="509667812-c347673f-5e6b-4e9d-b49e-196071e39b1d" src="https://github.com/user-attachments/assets/6e06c884-12ab-42ce-a026-1a0c57fc004f" />
+<img width="813" height="237" alt="510787591-ac77cc69-704a-4aa1-8b24-1594c358a107" src="https://github.com/user-attachments/assets/167cd104-8084-4c6a-b112-1a22f380a37d" />
+
 
 
 **Question 2**
 ---
-How many patients are there in each city?
+Write a SQL query to Identify customers whose city is different from the city of the customer with the highest ID
 
-Sample table: Patients Table
+SAMPLE TABLE: customer
 ```
-Address     TotalPatients
-----------  -------------
-Berlin      3
-Chicago     4
-Mexico      3
+name             type
+---------------  ---------------
+id               INTEGER
+name             TEXT
+city             TEXT
+email            TEXT
+phone            INTEGER
 ```
 
 ```sql
-select Address,count(*)
-as TotalPatients
-from Patients
-group by Address
+SELECT *
+FROM customer
+WHERE city <> (
+    SELECT city
+    FROM customer
+    WHERE id = (SELECT MAX(id) FROM customer)
+);
+
 ```
 
 **Output:**
 
-
-<img width="658" height="392" alt="509670333-848773cb-0780-4263-aa5e-36616d7f2f90" src="https://github.com/user-attachments/assets/8e7297ee-0aac-45b9-ba63-a3fe65e854fd" />
+<img width="811" height="267" alt="510788050-8f9df72c-8519-4440-9b7b-8e071c1110c9" src="https://github.com/user-attachments/assets/18e7084a-8aa6-4858-a18c-9fca9cd6ec54" />
 
 **Question 3**
 ---
-Write a SQL Query to find how many medications are prescribed for each patient?
+Write a SQL query to retrieve all columns from the CUSTOMERS table for customers whose salary is LESS than $2500.
 
-Sample table:MedicalRecords Table
+Sample table: CUSTOMERS
 ```
+ID          NAME        AGE         ADDRESS     SALARY
+----------  ----------  ----------  ----------  ----------
 
-PatientID   AvgMedications
-----------  --------------
-4           5
-6           1
-7           1
-8           3
+1          Ramesh     32              Ahmedabad     2000
+2          Khilan        25              Delhi                 1500
+3          Kaushik      23              Kota                  2000
+4          Chaitali       25             Mumbai            6500
+5          Hardik        27              Bhopal              8500
+6          Komal         22              Hyderabad       4500
+
+7           Muffy          24              Indore            10000
 ```
-
 
 ```sql
-SELECT PatientID,COUNT(*) AS 
-AvgMedications
-FROM MedicalRecords
-GROUP BY PatientID;
+SELECT *
+FROM CUSTOMERS
+WHERE SALARY < 2500;
+
 ```
 
 **Output:**
 
 
-<img width="677" height="612" alt="509671105-474f243d-b382-4cbc-8830-747a33d7c330" src="https://github.com/user-attachments/assets/eaa5b284-a857-4f11-8573-391523c485cc" />
+<img width="810" height="284" alt="510788508-074cdfec-41af-4dce-9ce8-e9af653f3277" src="https://github.com/user-attachments/assets/f008f98d-b655-4228-b7b2-9ff056258a13" />
 
 **Question 4**
 ---
-Write a SQL query to find the maximum purchase amount.
+From the following tables write a SQL query to count the number of customers with grades above the average in New York City. Return grade and count.
 
-Sample table: orders
+customer table
 ```
-ord_no      purch_amt   ord_date    customer_id  salesman_id
-
-----------  ----------  ----------  -----------  -----------
-
-70001       150.5       2012-10-05  3005         5002
-
-70009       270.65      2012-09-10  3001         5005
-
-70002       65.26       2012-10-05  3002         5001
+name         type
+-----------  ----------
+customer_id  int
+cust_name    text
+city         text
+grade        int
+salesman_id  int
 ```
+
 
 ```sql
-SELECT
-  MAX(purch_amt) AS MAXIMUM
-FROM
-  orders;
+SELECT grade, COUNT(*)
+FROM customer
+WHERE  grade > (SELECT AVG(grade) FROM customer WHERE city = 'New York')
+GROUP BY grade;
+
 ```
 
 **Output:**
 
-<img width="403" height="297" alt="509672004-39fa51d7-2e95-48f2-a7eb-50586ad8eec0" src="https://github.com/user-attachments/assets/03c49cea-68fe-4de8-9d42-22d287813c3d" />
+<img width="610" height="321" alt="510788901-c5840280-867c-4b54-bfce-285a4432dced" src="https://github.com/user-attachments/assets/ae788d23-4b6a-4ba2-8394-709ae059cdbf" />
 
 
 **Question 5**
 ---
-Write a SQL query to find the total income of employees aged 40 or above.
+Write a SQL query to retrieve all columns from the CUSTOMERS table for customers whose Address as Delhi
 
-Table: employee
+Sample table: CUSTOMERS
 ```
-name        type
-----------  ----------
-id          INTEGER
-name        TEXT
-age         INTEGER
-city        TEXT
-income      INTEGER
-```
+ID          NAME        AGE         ADDRESS     SALARY
+----------  ----------  ----------  ----------  ----------
 
+1          Ramesh     32              Ahmedabad     2000
+2          Khilan        25              Delhi                 1500
+3          Kaushik      23              Kota                  2000
+4          Chaitali       25             Mumbai            6500
+5          Hardik        27              Bhopal              8500
+6          Komal         22              Hyderabad       4500
+
+7           Muffy          24              Indore            10000
+```
 ```sql
-SELECT
-  SUM(income) AS total_income
-FROM
-  employee
-WHERE
-  age >= 40;
+SELECT *
+FROM CUSTOMERS
+WHERE ADDRESS = 'Delhi';
+
 ```
 
 **Output:**
 
+<img width="814" height="204" alt="510789717-52270e00-725d-46a1-aa3d-0d1bebfc8d36" src="https://github.com/user-attachments/assets/dab7fa5b-9726-4b80-8899-db798a9506af" />
 
-<img width="437" height="311" alt="509672942-05a9c241-b52b-4c65-873e-b560f079b47a" src="https://github.com/user-attachments/assets/29a8333a-22fd-4303-b110-aabb4c3e93b6" />
+
 
 **Question 6**
 ---
-Write a SQL query to find the number of employees whose age is greater than 32.
+From the following tables write a SQL query to find the order values greater than the average order value of 10th October 2012. Return ord_no, purch_amt, ord_date, customer_id, salesman_id.
+
+Note: date should be yyyy-mm-dd format
+
+ORDERS TABLE
+```
+name            type
+----------     ----------
+ord_no          int
+purch_amt    real
+ord_date       text
+customer_id  int
+salesman_id  int
+```
 
 ```sql
-SELECT
-  COUNT(*) AS COUNT
-FROM
-  employee
-WHERE
-  age > 32;
+SELECT ord_no, purch_amt, ord_date, customer_id, salesman_id
+FROM ORDERS
+WHERE purch_amt > (
+    SELECT AVG(purch_amt)
+    FROM ORDERS
+    WHERE ord_date = '2012-10-10'
+);
+
 ```
 
 **Output:**
 
-<img width="435" height="316" alt="509673946-c93b4873-45af-4fdd-934e-699dd60730de" src="https://github.com/user-attachments/assets/75b90c54-0e80-4111-8aad-4dc06084c423" />
+<img width="814" height="282" alt="510790381-c6222140-0d99-4139-9bf8-089eb429b89e" src="https://github.com/user-attachments/assets/f02dc433-4aed-4061-94ad-cb79d95e2d3f" />
 
 
 **Question 7**
 ---
-Write a SQL query to find the average length of names for people living in Chennai?
+From the following tables write a SQL query to find all orders generated by New York-based salespeople. Return ord_no, purch_amt, ord_date, customer_id, salesman_id.
 
-Table: customer
+salesman table
 ```
-name        type
-----------  ----------
-id          INTEGER
-name        TEXT   
-city        TEXT
-email       TEXT
-phone       INTEGER
+name             type
+---------------  ---------------
+salesman_id      numeric(5)
+name                 varchar(30)
+city                    varchar(15)
+commission       decimal(5,2)
+```
+orders table
+```
+name             type
+---------------  --------
+order_no         int
+purch_amt        real
+order_date       text
+customer_id      int
+salesman_id      int
 ```
 
 ```sql
-SELECT
-  AVG(LENGTH(name)) AS avg_name_length
-FROM
-  customer
-WHERE
-  city = 'Chennai';
+SELECT o.ord_no, o.purch_amt, o.ord_date, o.customer_id, o.salesman_id
+FROM orders o
+JOIN salesman s ON o.salesman_id = s.salesman_id
+WHERE s.city = 'New York';
+
 ```
 
 **Output:**
 
-<img width="438" height="295" alt="509675119-043bd99b-a9d2-4bba-bb82-76daf0a1684d" src="https://github.com/user-attachments/assets/fce31658-ae0a-4c08-a6fb-c932c5f3b057" />
+<img width="819" height="289" alt="510790962-8d119d31-ad23-49ee-94ee-fc90d18f0b31" src="https://github.com/user-attachments/assets/12365be9-45ea-4767-87e0-fedaa5e1357b" />
 
 
 **Question 8**
 ---
-Write the SQL query that accomplishes the grouping of data by joining date (jdate), calculates the maximum work hours for each date, and excludes dates where the maximum work hour is not greater than 12.
+From the following tables, write a SQL query to find those salespeople who earned the maximum commission. Return ord_no, purch_amt, ord_date, and salesman_id.
 
-Sample table: employee1
+salesman table
 ```
-jdate       MAX(workhour)
-----------  -------------
-2004.0      15
-2006.0      15
+name             type
+---------------  ---------------
+salesman_id      numeric(5)
+name                 varchar(30)
+city                    varchar(15)
+commission       decimal(5,2)
 ```
-
+orders table
+```
+name             type
+---------------  --------
+order_no         int
+purch_amt        real
+order_date       text
+customer_id      int
+salesman_id      int
+```
 ```sql
-SELECT
-  jdate,
-  MAX(workhour) AS "MAX(workhour)"
-FROM
-  employee1
-GROUP BY
-  jdate
-HAVING
-  MAX(workhour) > 12;
+SELECT o.ord_no, o.purch_amt, o.ord_date, o.salesman_id
+FROM orders o
+JOIN salesman s ON o.salesman_id = s.salesman_id
+WHERE s.commission = (
+    SELECT MAX(commission)
+    FROM salesman
+);
+
 ```
 
 **Output:**
 
-<img width="670" height="377" alt="509676408-d190c7b4-dbda-44de-a3bc-94c9ccdecf51" src="https://github.com/user-attachments/assets/07945bc4-bd3c-4f09-9e16-3e786b3c3066" />
+
+<img width="810" height="349" alt="510791676-18597d52-47f6-4f21-b463-46f45df76d65" src="https://github.com/user-attachments/assets/852f0429-ef19-4bf6-8dd1-615d49464156" />
 
 
 **Question 9**
 ---
-Write the SQL query that achieves the grouping of data by occupation, calculates the total work hours for each occupation, and excludes occupations where the total work hour sum is not greater than 20.
+From the following tables, write a SQL query to find all the orders generated in New York city. Return ord_no, purch_amt, ord_date, customer_id and salesman_id.
 
-Sample table: employee1
+SALESMAN TABLE
 ```
-occupation  SUM(workhour)
-----------  -------------
-Business    30
-Doctor      30
-Engineer    24
-Teacher     27
+name               type
+-----------        ----------
+salesman_id  numeric(5)
+name             varchar(30)
+city                 varchar(15)
+commission   decimal(5,2)
 ```
 
+orders table
+```
+name            type
+----------      ----------
+ord_no          int
+purch_amt    real
+ord_date       text
+customer_id  int
+salesman_id  int
+```
 ```sql
-SELECT
-  occupation,
-  SUM(workhour) AS "SUM(workhour)"
-FROM
-  employee1
-GROUP BY
-  occupation
-HAVING
-  SUM(workhour) > 20;
+SELECT o.ord_no, o.purch_amt, o.ord_date, o.customer_id, o.salesman_id
+FROM orders o
+JOIN salesman s ON o.salesman_id = s.salesman_id
+WHERE s.city = 'New York';
+
 ```
 
 **Output:**
 
-<img width="616" height="437" alt="509678788-901be72e-8384-4d00-92f0-fc707bfdd8ef" src="https://github.com/user-attachments/assets/f238840f-bccb-482f-a0f5-5cc7d8f84186" />
-
+<img width="814" height="309" alt="510792526-cc4404e5-037b-4e32-93e3-b3bd20356ba9" src="https://github.com/user-attachments/assets/efa6565e-cd52-4ac4-91ef-14664ae6085a" />
 
 
 **Question 10**
 ---
-Write the SQL query that achieves the grouping of data by occupation, calculates the average work hours for each occupation, and includes only those occupations where the average work hour falls between 10 and 12.
+Write a SQL query that retrieves the all the columns from the Table Grades, where the grade is equal to the minimum grade achieved in each subject.
 
-Sample table: employee1
-```
-Result
-occupation  AVG(workhour)
-----------  -------------
-Business    10.0
-Engineer    12.0
-```
+Sample table: GRADES (attributes: student_id, student_name, subject, grade)
 
 ```sql
-SELECT
-  occupation,
-  AVG(workhour) AS "AVG(workhour)"
-FROM
-  employee1
-GROUP BY
-  occupation
-HAVING
-  AVG(workhour) BETWEEN 10 AND 12;
+SELECT student_id, student_name, subject, grade
+FROM Grades g
+WHERE grade = (
+    SELECT MIN(grade)
+    FROM Grades
+    WHERE subject = g.subject
+);
+
 ```
 
 **Output:**
 
-<img width="753" height="387" alt="509679811-f8038c39-ebd7-4fbb-84fd-608829951be1" src="https://github.com/user-attachments/assets/5fc6ef29-2557-42c3-9741-5c9a2df74dce" />
+<img width="816" height="246" alt="510793158-193fd553-e88b-4517-a335-88a71a162267" src="https://github.com/user-attachments/assets/eb269302-1726-4f61-8055-552077a6245c" />
 
 
 
 ## RESULT
-Thus, the SQL queries to implement aggregate functions, GROUP BY, and HAVING clause have been executed successfully.
-# Experiment 4: Aggregate Functions, Group By and Having Clause
-
-## AIM
-To study and implement aggregate functions, GROUP BY, and HAVING clause with suitable examples.
-
-## THEORY
-
-### Aggregate Functions
-These perform calculations on a set of values and return a single value.
-
-- **MIN()** – Smallest value  
-- **MAX()** – Largest value  
-- **COUNT()** – Number of rows  
-- **SUM()** – Total of values  
-- **AVG()** – Average of values
-
-**Syntax:**
-```sql
-SELECT AGG_FUNC(column_name) FROM table_name WHERE condition;
-```
-### GROUP BY
-Groups records with the same values in specified columns.
-**Syntax:**
-```sql
-SELECT column_name, AGG_FUNC(column_name)
-FROM table_name
-GROUP BY column_name;
-```
-### HAVING
-Filters the grouped records based on aggregate conditions.
-**Syntax:**
-```sql
-SELECT column_name, AGG_FUNC(column_name)
-FROM table_name
-GROUP BY column_name
-HAVING condition;
-```
-
-**Question 1**
---
-What is the average dosage prescribed for each medication?
-
-Sample tablePrescriptions Table
-```
-Medication     AvgDosage
--------------  ----------
-Ciprofloxacin  500.0
-Doxorubicin    60.0
-Ibuprofen      400.0
-Levothyroxine  50.0
-Lisinopril     10.0
-MMR            0.5
-Pending        0.0
-Prenatal vita  1.0
-Sertraline     50.0
-Topiramate     25.0
-```
-
-```sql
-SELECT
-  Medication,
-  AVG(Dosage) AS AvgDosage
-FROM
-  Prescriptions
-GROUP BY
-  Medication;
-
-```
-
-**Output:**
-
-<img width="695" height="742" alt="509667812-c347673f-5e6b-4e9d-b49e-196071e39b1d" src="https://github.com/user-attachments/assets/6e06c884-12ab-42ce-a026-1a0c57fc004f" />
-
-
-**Question 2**
----
-How many patients are there in each city?
-
-Sample table: Patients Table
-```
-Address     TotalPatients
-----------  -------------
-Berlin      3
-Chicago     4
-Mexico      3
-```
-
-```sql
-select Address,count(*)
-as TotalPatients
-from Patients
-group by Address
-```
-
-**Output:**
-
-
-<img width="658" height="392" alt="509670333-848773cb-0780-4263-aa5e-36616d7f2f90" src="https://github.com/user-attachments/assets/8e7297ee-0aac-45b9-ba63-a3fe65e854fd" />
-
-**Question 3**
----
-Write a SQL Query to find how many medications are prescribed for each patient?
-
-Sample table:MedicalRecords Table
-```
-
-PatientID   AvgMedications
-----------  --------------
-4           5
-6           1
-7           1
-8           3
-```
-
-
-```sql
-SELECT PatientID,COUNT(*) AS 
-AvgMedications
-FROM MedicalRecords
-GROUP BY PatientID;
-```
-
-**Output:**
-
-
-<img width="677" height="612" alt="509671105-474f243d-b382-4cbc-8830-747a33d7c330" src="https://github.com/user-attachments/assets/eaa5b284-a857-4f11-8573-391523c485cc" />
-
-**Question 4**
----
-Write a SQL query to find the maximum purchase amount.
-
-Sample table: orders
-```
-ord_no      purch_amt   ord_date    customer_id  salesman_id
-
-----------  ----------  ----------  -----------  -----------
-
-70001       150.5       2012-10-05  3005         5002
-
-70009       270.65      2012-09-10  3001         5005
-
-70002       65.26       2012-10-05  3002         5001
-```
-
-```sql
-SELECT
-  MAX(purch_amt) AS MAXIMUM
-FROM
-  orders;
-```
-
-**Output:**
-
-<img width="403" height="297" alt="509672004-39fa51d7-2e95-48f2-a7eb-50586ad8eec0" src="https://github.com/user-attachments/assets/03c49cea-68fe-4de8-9d42-22d287813c3d" />
-
-
-**Question 5**
----
-Write a SQL query to find the total income of employees aged 40 or above.
-
-Table: employee
-```
-name        type
-----------  ----------
-id          INTEGER
-name        TEXT
-age         INTEGER
-city        TEXT
-income      INTEGER
-```
-
-```sql
-SELECT
-  SUM(income) AS total_income
-FROM
-  employee
-WHERE
-  age >= 40;
-```
-
-**Output:**
-
-
-<img width="437" height="311" alt="509672942-05a9c241-b52b-4c65-873e-b560f079b47a" src="https://github.com/user-attachments/assets/29a8333a-22fd-4303-b110-aabb4c3e93b6" />
-
-**Question 6**
----
-Write a SQL query to find the number of employees whose age is greater than 32.
-
-```sql
-SELECT
-  COUNT(*) AS COUNT
-FROM
-  employee
-WHERE
-  age > 32;
-```
-
-**Output:**
-
-<img width="435" height="316" alt="509673946-c93b4873-45af-4fdd-934e-699dd60730de" src="https://github.com/user-attachments/assets/75b90c54-0e80-4111-8aad-4dc06084c423" />
-
-
-**Question 7**
----
-Write a SQL query to find the average length of names for people living in Chennai?
-
-Table: customer
-```
-name        type
-----------  ----------
-id          INTEGER
-name        TEXT   
-city        TEXT
-email       TEXT
-phone       INTEGER
-```
-
-```sql
-SELECT
-  AVG(LENGTH(name)) AS avg_name_length
-FROM
-  customer
-WHERE
-  city = 'Chennai';
-```
-
-**Output:**
-
-<img width="438" height="295" alt="509675119-043bd99b-a9d2-4bba-bb82-76daf0a1684d" src="https://github.com/user-attachments/assets/fce31658-ae0a-4c08-a6fb-c932c5f3b057" />
-
-
-**Question 8**
----
-Write the SQL query that accomplishes the grouping of data by joining date (jdate), calculates the maximum work hours for each date, and excludes dates where the maximum work hour is not greater than 12.
-
-Sample table: employee1
-```
-jdate       MAX(workhour)
-----------  -------------
-2004.0      15
-2006.0      15
-```
-
-```sql
-SELECT
-  jdate,
-  MAX(workhour) AS "MAX(workhour)"
-FROM
-  employee1
-GROUP BY
-  jdate
-HAVING
-  MAX(workhour) > 12;
-```
-
-**Output:**
-
-<img width="670" height="377" alt="509676408-d190c7b4-dbda-44de-a3bc-94c9ccdecf51" src="https://github.com/user-attachments/assets/07945bc4-bd3c-4f09-9e16-3e786b3c3066" />
-
-
-**Question 9**
----
-Write the SQL query that achieves the grouping of data by occupation, calculates the total work hours for each occupation, and excludes occupations where the total work hour sum is not greater than 20.
-
-Sample table: employee1
-```
-occupation  SUM(workhour)
-----------  -------------
-Business    30
-Doctor      30
-Engineer    24
-Teacher     27
-```
-
-```sql
-SELECT
-  occupation,
-  SUM(workhour) AS "SUM(workhour)"
-FROM
-  employee1
-GROUP BY
-  occupation
-HAVING
-  SUM(workhour) > 20;
-```
-
-**Output:**
-
-<img width="616" height="437" alt="509678788-901be72e-8384-4d00-92f0-fc707bfdd8ef" src="https://github.com/user-attachments/assets/f238840f-bccb-482f-a0f5-5cc7d8f84186" />
-
-
-
-**Question 10**
----
-Write the SQL query that achieves the grouping of data by occupation, calculates the average work hours for each occupation, and includes only those occupations where the average work hour falls between 10 and 12.
-
-Sample table: employee1
-```
-Result
-occupation  AVG(workhour)
-----------  -------------
-Business    10.0
-Engineer    12.0
-```
-
-```sql
-SELECT
-  occupation,
-  AVG(workhour) AS "AVG(workhour)"
-FROM
-  employee1
-GROUP BY
-  occupation
-HAVING
-  AVG(workhour) BETWEEN 10 AND 12;
-```
-
-**Output:**
-
-<img width="753" height="387" alt="509679811-f8038c39-ebd7-4fbb-84fd-608829951be1" src="https://github.com/user-attachments/assets/5fc6ef29-2557-42c3-9741-5c9a2df74dce" />
-
-
-
-## RESULT
-Thus, the SQL queries to implement aggregate functions, GROUP BY, and HAVING clause have been executed successfully.
+Thus, the SQL queries to implement subqueries and views have been executed successfully.
