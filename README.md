@@ -1,219 +1,77 @@
-# Experiment 9: PL/SQL – Procedures and Functions
+# Experiment 10: PL/SQL – Triggers
 
 ## AIM
-To understand and implement procedures and functions in PL/SQL for performing various operations such as calculations, decision-making, and looping.
+To write and execute PL/SQL trigger programs for automating actions in response to specific table events like INSERT, UPDATE, or DELETE.
 
 ---
 
 ## THEORY
 
-PL/SQL (Procedural Language/SQL) extends SQL by adding procedural constructs like variables, conditions, loops, procedures, and functions. Procedures and functions are subprograms that help modularize the code and improve reusability.
+A **trigger** is a stored PL/SQL block that is automatically executed or fired when a specified event occurs on a table or view. Triggers can be used for enforcing business rules, auditing changes, or automatic updates.
 
-### **Procedure**
-A PL/SQL **procedure** is a subprogram that performs a specific action. It does not return a value directly but can return values using `OUT` parameters.
+### Types of Triggers:
+- **Before Trigger**: Executes before the operation (INSERT, UPDATE, DELETE).
+- **After Trigger**: Executes after the operation.
+- **Row-level Trigger**: Executes for each affected row.
+- **Statement-level Trigger**: Executes once for the triggering statement.
 
-**Syntax:**
+**Basic Syntax:**
 ```sql
-CREATE OR REPLACE PROCEDURE procedure_name (parameters)
-IS
+CREATE OR REPLACE TRIGGER trigger_name
+BEFORE|AFTER INSERT|UPDATE|DELETE ON table_name
+[FOR EACH ROW]
 BEGIN
-   -- statements
+   -- trigger logic
 END;
 ```
 
-To call the procedure
+## 1. Write a trigger to log every insertion into a table.
+**Steps:**
+- Create two tables: `employees` (for storing data) and `employee_log` (for logging the inserts).
+- Write an **AFTER INSERT** trigger on the `employees` table to log the new data into the `employee_log` table.
 
-```sql
-EXEC procedure_name(arguments);
-```
-
-### **Function**
-A PL/SQL **function** is a subprogram that returns a single value using the RETURN keyword.
-
-```sql
-CREATE OR REPLACE FUNCTION function_name (parameters)
-RETURN datatype
-IS
-BEGIN
-   -- statements
-   RETURN value;
-END;
-```
-
-To call the function:
-
-```sql
-SELECT function_name(arguments) FROM DUAL;
-```
-
-Key Differences:
-
--A procedure does not return a value, whereas a function must return a value.
--Functions can be called from SQL queries, procedures cannot (in most cases).
-
-## 1. Write a PL/SQL Procedure to Find the Square of a Number
-
-### Steps:
-- Create a procedure named `find_square`.
-- Declare a parameter to accept a number.
-- Inside the procedure, compute the square of the input number.
-- Use `DBMS_OUTPUT.PUT_LINE` to display the result.
-- Call the procedure with a number as input.
-
-### Program:
-```
-CREATE OR REPLACE PROCEDURE find_square (num IN NUMBER)
-IS
-   result NUMBER;
-BEGIN
-   result := num * num;
-   DBMS_OUTPUT.PUT_LINE('Square of ' || num || ' is ' || result);
-END;
-EXEC find_square(6);
-```
-
-**Expected Output:**  
-Square of 6 is 36
-
-<img width="1412" height="734" alt="514786206-b1080bf4-5eb9-4434-ac8d-26c27caf5d27" src="https://github.com/user-attachments/assets/157a3345-abbb-4180-b48b-2959f9125b63" />
-
+**Expected Output:**
+- A new entry is added to the `employee_log` table each time a new record is inserted into the `employees` table.
 
 ---
 
-## 2. Write a PL/SQL Function to Return the Factorial of a Number
+## 2. Write a trigger to prevent deletion of records from a sensitive table.
+**Steps:**
+- Write a **BEFORE DELETE** trigger on the `sensitive_data` table.
+- Use `RAISE_APPLICATION_ERROR` to prevent deletion and issue a custom error message.
 
-### Steps:
-- Create a function named `get_factorial`.
-- Declare a parameter to accept a number.
-- Use a loop to calculate the factorial.
-- Return the result using the `RETURN` statement.
-- Call the function using a `SELECT` statement or in an anonymous block.
-
-### Program:
-```
-CREATE OR REPLACE FUNCTION get_factorial (n IN NUMBER)
-RETURN NUMBER
-IS
-   fact NUMBER := 1;
-BEGIN
-   FOR i IN 1..n LOOP
-      fact := fact * i;
-   END LOOP;
-   RETURN fact;
-END;
-
-BEGIN
-   DBMS_OUTPUT.PUT_LINE('Factorial of 5 is ' || get_factorial(5));
-END;
-```
-
-**Expected Output:**  
-Factorial of 5 is 120
-
-<img width="1409" height="735" alt="514786313-bd391fcb-4210-4531-86f8-405050233797" src="https://github.com/user-attachments/assets/081d87ec-12f2-43b0-a7eb-a540b33a064d" />
-
+**Expected Output:**
+- If an attempt is made to delete a record from `sensitive_data`, an error message is raised, e.g., `ERROR: Deletion not allowed on this table.`
 
 ---
 
-## 3. Write a PL/SQL Procedure to Check Whether a Number is Even or Odd
+## 3. Write a trigger to automatically update a `last_modified` timestamp.
+**Steps:**
+- Add a `last_modified` column to the `products` table.
+- Write a **BEFORE UPDATE** trigger on the `products` table to set the `last_modified` column to the current timestamp whenever an update occurs.
 
-### Steps:
-- Create a procedure named `check_even_odd`.
-- Accept an input parameter.
-- Use the `MOD` function to check if the number is divisible by 2.
-- Display whether it is Even or Odd using `DBMS_OUTPUT.PUT_LINE`.
-
-### Program:
-```
-CREATE OR REPLACE PROCEDURE check_even_odd (n IN NUMBER)
-IS
-BEGIN
-   IF MOD(n, 2) = 0 THEN
-      DBMS_OUTPUT.PUT_LINE(n || ' is Even');
-   ELSE
-      DBMS_OUTPUT.PUT_LINE(n || ' is Odd');
-   END IF;
-END;
-EXEC check_even_odd(12);
-```
-
-**Expected Output:**  
-12 is Even
-
-<img width="1394" height="793" alt="514786341-44de56bf-68aa-4607-812e-b243a920ec7e" src="https://github.com/user-attachments/assets/7835b8ff-5a3f-42d4-87f0-e6cc840be0bf" />
+**Expected Output:**
+- The `last_modified` column in the `products` table is updated automatically to the current date and time when any record is updated.
 
 ---
 
-## 4. Write a PL/SQL Function to Return the Reverse of a Number
+## 4. Write a trigger to keep track of the number of updates made to a table.
+**Steps:**
+- Create an `audit_log` table with a counter column.
+- Write an **AFTER UPDATE** trigger on the `customer_orders` table to increment the counter in the `audit_log` table every time a record is updated.
 
-### Steps:
-- Create a function named `reverse_number`.
-- Accept an input number as parameter.
-- Use a loop to reverse the digits of the number.
-- Return the reversed number.
-- Call the function and display the output.
-
-### Program:
-```
-CREATE OR REPLACE FUNCTION reverse_number (n IN NUMBER)
-RETURN NUMBER
-IS
-   rev NUMBER := 0;
-   temp NUMBER := n;
-BEGIN
-   WHILE temp > 0 LOOP
-      rev := rev * 10 + MOD(temp, 10);
-      temp := TRUNC(temp / 10);
-   END LOOP;
-   RETURN rev;
-END;
-BEGIN
-   DBMS_OUTPUT.PUT_LINE('Reversed number of 1234 is ' || reverse_number(1234));
-END;
-```
-
-**Expected Output:**  
-Reversed number of 1234 is 4321
-
-
-<img width="1396" height="741" alt="514786387-11876f93-cf05-45de-94bb-69e5da461e05" src="https://github.com/user-attachments/assets/492de9bb-bd22-48ff-92d8-4d86cbf4f9fb" />
+**Expected Output:**
+- The `audit_log` table will maintain a count of how many updates have been made to the `customer_orders` table.
 
 ---
 
-## 5. Write a PL/SQL Procedure to Display the Multiplication Table of a Number
+## 5. Write a trigger that checks a condition before allowing insertion into a table.
+**Steps:**
+- Write a **BEFORE INSERT** trigger on the `employees` table to check if the inserted salary meets a specific condition (e.g., salary must be greater than 3000).
+- If the condition is not met, raise an error to prevent the insert.
 
-### Steps:
-- Create a procedure named `print_table`.
-- Accept an input number.
-- Use a loop from 1 to 10 to multiply the input number.
-- Display the multiplication results using `DBMS_OUTPUT.PUT_LINE`.
-
-### Program:
-```
-CREATE OR REPLACE PROCEDURE print_table (n IN NUMBER)
-IS
-BEGIN
-   DBMS_OUTPUT.PUT_LINE('Multiplication table of ' || n || ':');
-   FOR i IN 1..10 LOOP
-      DBMS_OUTPUT.PUT_LINE(n || ' x ' || i || ' = ' || (n * i));
-   END LOOP;
-END;
-
-EXEC print_table(5);
-```
-
-**Expected Output:**  
-Multiplication table of 5:  
-5 x 1 = 5  
-5 x 2 = 10  
-5 x 3 = 15  
-...  
-5 x 10 = 50
-
-
-
-<img width="1395" height="730" alt="514786480-81495f02-a7f4-439c-8c42-941b61275a3a" src="https://github.com/user-attachments/assets/d5edb0d0-52be-43a5-8883-a4332d17c9e3" />
-
+**Expected Output:**
+- If the inserted salary in the `employees` table is below the condition (e.g., salary < 3000), the insert operation is blocked, and an error message is raised, such as: `ERROR: Salary below minimum threshold.`
 
 ## RESULT
-Thus, the PL/SQL programs using procedures and functions were written, compiled, and executed successfully.
+Thus, the PL/SQL trigger programs were written and executed successfully.
