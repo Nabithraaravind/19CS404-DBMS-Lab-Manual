@@ -1,296 +1,652 @@
-# Experiment 3: DML Commands
+# Experiment 4: Aggregate Functions, Group By and Having Clause
 
 ## AIM
-To study and implement DML (Data Manipulation Language) commands.
+To study and implement aggregate functions, GROUP BY, and HAVING clause with suitable examples.
 
 ## THEORY
 
-### 1. INSERT INTO
-Used to add records into a relation.
-These are three type of INSERT INTO queries which are as
-A)Inserting a single record
-**Syntax (Single Row):**
-```sql
-INSERT INTO table_name (field_1, field_2, ...) VALUES (value_1, value_2, ...);
-```
-**Syntax (Multiple Rows):**
-```sql
-INSERT INTO table_name (field_1, field_2, ...) VALUES
-(value_1, value_2, ...),
-(value_3, value_4, ...);
-```
-**Syntax (Insert from another table):**
-```sql
-INSERT INTO table_name SELECT * FROM other_table WHERE condition;
-```
-### 2. UPDATE
-Used to modify records in a relation.
-Syntax:
-```sql
-UPDATE table_name SET column1 = value1, column2 = value2 WHERE condition;
-```
-### 3. DELETE
-Used to delete records from a relation.
-**Syntax (All rows):**
-```sql
-DELETE FROM table_name;
-```
-**Syntax (Specific condition):**
-```sql
-DELETE FROM table_name WHERE condition;
-```
-### 4. SELECT
-Used to retrieve records from a table.
+### Aggregate Functions
+These perform calculations on a set of values and return a single value.
+
+- **MIN()** – Smallest value  
+- **MAX()** – Largest value  
+- **COUNT()** – Number of rows  
+- **SUM()** – Total of values  
+- **AVG()** – Average of values
+
 **Syntax:**
 ```sql
-SELECT column1, column2 FROM table_name WHERE condition;
+SELECT AGG_FUNC(column_name) FROM table_name WHERE condition;
 ```
+### GROUP BY
+Groups records with the same values in specified columns.
+**Syntax:**
+```sql
+SELECT column_name, AGG_FUNC(column_name)
+FROM table_name
+GROUP BY column_name;
+```
+### HAVING
+Filters the grouped records based on aggregate conditions.
+**Syntax:**
+```sql
+SELECT column_name, AGG_FUNC(column_name)
+FROM table_name
+GROUP BY column_name
+HAVING condition;
+```
+
 **Question 1**
 --
-Write a SQL statement to double the availability of the product with product_id 1. products table
+What is the average dosage prescribed for each medication?
 
-product_id product_name category_id availability
+Sample tablePrescriptions Table
+```
+Medication     AvgDosage
+-------------  ----------
+Ciprofloxacin  500.0
+Doxorubicin    60.0
+Ibuprofen      400.0
+Levothyroxine  50.0
+Lisinopril     10.0
+MMR            0.5
+Pending        0.0
+Prenatal vita  1.0
+Sertraline     50.0
+Topiramate     25.0
+```
 
 ```sql
-update products
-set availability = availability * 2
-where product_id = 1;
+SELECT
+  Medication,
+  AVG(Dosage) AS AvgDosage
+FROM
+  Prescriptions
+GROUP BY
+  Medication;
+
 ```
 
 **Output:**
 
-<img width="817" height="156" alt="509078872-64439a85-b499-421a-ac0a-7756886fd282" src="https://github.com/user-attachments/assets/f487d92b-80b2-44d3-a13f-5ebc41d9633c" />
+<img width="695" height="742" alt="509667812-c347673f-5e6b-4e9d-b49e-196071e39b1d" src="https://github.com/user-attachments/assets/6e06c884-12ab-42ce-a026-1a0c57fc004f" />
 
 
 **Question 2**
 ---
-Write a SQL statement to Double the salary for employees in department 20 who have a job_id ending with 'MAN' Employees table
+How many patients are there in each city?
+
+Sample table: Patients Table
 ```
----------------
-employee_id
-first_name
-last_name
-email
-phone_number
-hire_date
-job_id
-salary
-commission_pct
-manager_id
-department_id
+Address     TotalPatients
+----------  -------------
+Berlin      3
+Chicago     4
+Mexico      3
 ```
 
 ```sql
-update Employees 
-set SALARY = SALARY * 2 
-where job_id like "%MAN"
+select Address,count(*)
+as TotalPatients
+from Patients
+group by Address
 ```
 
 **Output:**
 
-<img width="817" height="235" alt="509079363-5e734feb-30b1-4ed9-beff-1e6da07bacdf" src="https://github.com/user-attachments/assets/f07ce6fe-8dce-4ec4-8fc8-e6461a150989" />
 
+<img width="658" height="392" alt="509670333-848773cb-0780-4263-aa5e-36616d7f2f90" src="https://github.com/user-attachments/assets/8e7297ee-0aac-45b9-ba63-a3fe65e854fd" />
 
 **Question 3**
 ---
-Write a SQL statement to Update the address to '58 Lakeview, Magnolia' where supplier ID is 5 in the suppliers table.
-```
-Suppliers Table
-name               type
------------------  ---------------
-supplier_id        INT
-supplier_name      VARCHAR(100)
-contact_person     VARCHAR(100)
-phone_number       VARCHAR(20)
-email              VARCHAR(100)
-address            VARCHAR(250)
+Write a SQL Query to find how many medications are prescribed for each patient?
+
+Sample table:MedicalRecords Table
 ```
 
+PatientID   AvgMedications
+----------  --------------
+4           5
+6           1
+7           1
+8           3
+```
+
+
 ```sql
-update Suppliers
-set address = '58 Lakeview, Magnolia'
-where supplier_id=5
+SELECT PatientID,COUNT(*) AS 
+AvgMedications
+FROM MedicalRecords
+GROUP BY PatientID;
 ```
 
 **Output:**
 
-<img width="817" height="265" alt="509079812-ba38ace7-746a-4860-bc84-8bb13a8ada7c" src="https://github.com/user-attachments/assets/9321d10c-5075-4a4d-9c13-e1dca8fbfc1b" />
 
-
+<img width="677" height="612" alt="509671105-474f243d-b382-4cbc-8830-747a33d7c330" src="https://github.com/user-attachments/assets/eaa5b284-a857-4f11-8573-391523c485cc" />
 
 **Question 4**
 ---
-Write a SQL statement to change the email column of employees table with 'Unavailable' for all employees in employees table.
+Write a SQL query to find the maximum purchase amount.
+
+Sample table: orders
 ```
-Employees table
----------------
-employee_id
-first_name
-last_name
-email
-phone_number
-hire_date
-job_id
-salary
-commission_pct
-manager_id
-department_id
+ord_no      purch_amt   ord_date    customer_id  salesman_id
+
+----------  ----------  ----------  -----------  -----------
+
+70001       150.5       2012-10-05  3005         5002
+
+70009       270.65      2012-09-10  3001         5005
+
+70002       65.26       2012-10-05  3002         5001
 ```
+
 ```sql
-update Employees 
-set EMAIL = 'Unavailable'
+SELECT
+  MAX(purch_amt) AS MAXIMUM
+FROM
+  orders;
 ```
 
 **Output:**
 
-
-<img width="812" height="312" alt="509080927-ba794059-6846-4d87-8e5c-2673d5f38dfc" src="https://github.com/user-attachments/assets/81a26d79-121d-4394-82fd-967e25b6c580" />
+<img width="403" height="297" alt="509672004-39fa51d7-2e95-48f2-a7eb-50586ad8eec0" src="https://github.com/user-attachments/assets/03c49cea-68fe-4de8-9d42-22d287813c3d" />
 
 
 **Question 5**
 ---
-Decrease the reorder level by 30 percent where the product name contains 'cream' and quantity in stock is higher than reorder level in the products table.
+Write a SQL query to find the total income of employees aged 40 or above.
 
-PRODUCTS TABLE
+Table: employee
 ```
-name               type
------------------  ---------------
-product_id         INT
-product_name       VARCHAR(100)
-category           VARCHAR(50)
-cost_price         DECIMAL(10,2)
-sell_price         DECIMAL(10,2)
-reorder_lvl        INT
-quantity           INT
-supplier_id        INT
+name        type
+----------  ----------
+id          INTEGER
+name        TEXT
+age         INTEGER
+city        TEXT
+income      INTEGER
 ```
 
 ```sql
-UPDATE  PRODUCTS 
-set reorder_lvl = reorder_lvl * 0.7
-where product_name like '%cream%' and quantity > reorder_lvl;
+SELECT
+  SUM(income) AS total_income
+FROM
+  employee
+WHERE
+  age >= 40;
 ```
 
 **Output:**
 
 
-<img width="817" height="332" alt="509081409-7fff9558-0599-4b92-b8b5-ff7b37902efd" src="https://github.com/user-attachments/assets/51d016c8-9a5c-405a-9323-648b7b636ee0" />
+<img width="437" height="311" alt="509672942-05a9c241-b52b-4c65-873e-b560f079b47a" src="https://github.com/user-attachments/assets/29a8333a-22fd-4303-b110-aabb4c3e93b6" />
 
 **Question 6**
 ---
-Write a SQL query to Delete customers from 'customer' table where 'CUST_CITY' is not 'New York' and 'OUTSTANDING_AMT' is greater than 5000.
-
-Sample table: Customer
-```
-+-----------+-------------+-------------+--------------+--------------+-------+-------------+-------------+-------------+---------------+--------------+------------+  
-|CUST_CODE  | CUST_NAME   | CUST_CITY   | WORKING_AREA | CUST_COUNTRY | GRADE | OPENING_AMT | RECEIVE_AMT | PAYMENT_AMT |OUTSTANDING_AMT| PHONE_NO     | AGENT_CODE |
-+-----------+-------------+-------------+--------------+--------------+-------+-------------+-------------+-------------+---------------+--------------+------------+
-| C00013    | Holmes      | London      | London       | UK           |     2 |     6000.00 |     5000.00 |     7000.00 |       4000.00 | BBBBBBB      | A003       |
-| C00001    | Micheal     | New York    | New York     | USA          |     2 |     3000.00 |     5000.00 |     2000.00 |       6000.00 | CCCCCCC      | A008       |
-| C00020    | Albert      | New York    | New York     | USA          |     3 |     5000.00 |     7000.00 |     6000.00 |       6000.00 |BBBBSBB      | A008
-```
+Write a SQL query to find the number of employees whose age is greater than 32.
 
 ```sql
-delete FROM Customer
-where CUST_CITY <>'New York' and OUTSTANDING_AMT > 5000;
+SELECT
+  COUNT(*) AS COUNT
+FROM
+  employee
+WHERE
+  age > 32;
 ```
 
 **Output:**
 
-<img width="822" height="385" alt="509085522-1320a9fc-f385-4b3d-9add-2b0a4788e415" src="https://github.com/user-attachments/assets/1669766f-cdbf-4b92-83cc-f534ff9d6245" />
-
+<img width="435" height="316" alt="509673946-c93b4873-45af-4fdd-934e-699dd60730de" src="https://github.com/user-attachments/assets/75b90c54-0e80-4111-8aad-4dc06084c423" />
 
 
 **Question 7**
 ---
-Write a SQL query to Delete customers from 'customer' table where 'GRADE' is odd.
+Write a SQL query to find the average length of names for people living in Chennai?
 
-Sample table: Customer
+Table: customer
 ```
-+-----------+-------------+-------------+--------------+--------------+-------+-------------+-------------+-------------+---------------+--------------+------------+  
-|CUST_CODE  | CUST_NAME   | CUST_CITY   | WORKING_AREA | CUST_COUNTRY | GRADE | OPENING_AMT | RECEIVE_AMT | PAYMENT_AMT |OUTSTANDING_AMT| PHONE_NO     | AGENT_CODE |
-+-----------+-------------+-------------+--------------+--------------+-------+-------------+-------------+-------------+---------------+--------------+------------+
-| C00013    | Holmes      | London      | London       | UK           |     2 |     6000.00 |     5000.00 |     7000.00 |       4000.00 | BBBBBBB      | A003       |
-| C00001    | Micheal     | New York    | New York     | USA          |     2 |     3000.00 |     5000.00 |     2000.00 |       6000.00 | CCCCCCC      | A008       |
-| C00020    | Albert      | New York    | New York     | USA          |     3 |     5000.00 |     7000.00 |     6000.00 |       6000.00 | BBBBSBB      | A008
+name        type
+----------  ----------
+id          INTEGER
+name        TEXT   
+city        TEXT
+email       TEXT
+phone       INTEGER
 ```
 
 ```sql
-delete from Customer
-where grade%2=1;
+SELECT
+  AVG(LENGTH(name)) AS avg_name_length
+FROM
+  customer
+WHERE
+  city = 'Chennai';
 ```
 
 **Output:**
 
-<img width="817" height="287" alt="509085944-97d682a0-9c13-4d16-b8b7-39bbc4c1fe87" src="https://github.com/user-attachments/assets/909185e9-4d89-4c36-8c18-fbb0f2a3df21" />
+<img width="438" height="295" alt="509675119-043bd99b-a9d2-4bba-bb82-76daf0a1684d" src="https://github.com/user-attachments/assets/fce31658-ae0a-4c08-a6fb-c932c5f3b057" />
 
 
 **Question 8**
 ---
+Write the SQL query that accomplishes the grouping of data by joining date (jdate), calculates the maximum work hours for each date, and excludes dates where the maximum work hour is not greater than 12.
 
-Write a SQL query to Delete All Doctors with a NULL Specialization
-
-Sample table: Doctors
-
-attributes : doctor_id, first_name, last_name, specialization
+Sample table: employee1
+```
+jdate       MAX(workhour)
+----------  -------------
+2004.0      15
+2006.0      15
+```
 
 ```sql
-delete from Doctors
-where specialization is null;
+SELECT
+  jdate,
+  MAX(workhour) AS "MAX(workhour)"
+FROM
+  employee1
+GROUP BY
+  jdate
+HAVING
+  MAX(workhour) > 12;
 ```
 
 **Output:**
 
-<img width="812" height="627" alt="509087326-edb46473-d7ff-45d7-8621-4a0fbb6775fc" src="https://github.com/user-attachments/assets/ef18a6f8-ba10-4c59-b710-15117819e94a" />
+<img width="670" height="377" alt="509676408-d190c7b4-dbda-44de-a3bc-94c9ccdecf51" src="https://github.com/user-attachments/assets/07945bc4-bd3c-4f09-9e16-3e786b3c3066" />
 
 
 **Question 9**
-Show the categoryName and description from the categories table sorted by categoryName.
+---
+Write the SQL query that achieves the grouping of data by occupation, calculates the total work hours for each occupation, and excludes occupations where the total work hour sum is not greater than 20.
+
+Sample table: employee1
 ```
-name                     type
----------------       ---------------
-CategoryID           INTEGER
-CategoryName     VARCHAR(25)
-Description          VARCHAR(255)
+occupation  SUM(workhour)
+----------  -------------
+Business    30
+Doctor      30
+Engineer    24
+Teacher     27
 ```
+
 ```sql
-select CategoryName,Description from categories
-order by CategoryName ASC;
+SELECT
+  occupation,
+  SUM(workhour) AS "SUM(workhour)"
+FROM
+  employee1
+GROUP BY
+  occupation
+HAVING
+  SUM(workhour) > 20;
 ```
 
 **Output:**
 
+<img width="616" height="437" alt="509678788-901be72e-8384-4d00-92f0-fc707bfdd8ef" src="https://github.com/user-attachments/assets/f238840f-bccb-482f-a0f5-5cc7d8f84186" />
 
-<img width="813" height="331" alt="509088370-01db0404-37f0-44bf-a3aa-4f6be0689855" src="https://github.com/user-attachments/assets/eb6098df-ce7f-4f52-a381-b7ad9ce6ebf7" />
+
 
 **Question 10**
 ---
-Write a SQL query to categorize value1 in the Calculations table as 'High' if it is greater than 50, otherwise 'Low'.
+Write the SQL query that achieves the grouping of data by occupation, calculates the average work hours for each occupation, and includes only those occupations where the average work hour falls between 10 and 12.
+
+Sample table: employee1
 ```
-cid         name        type        notnull     dflt_value  pk
-----------  ----------  ----------  ----------  ----------  ----------
-0           id          INTEGER     0                       1
-1           value1      REAL        0                       0
-2           value2      REAL        0                       0
-3           base        INTEGER     0                       0
-4           exponent    INTEGER     0                       0
-5           number      REAL        0                       0
-6           decimal     REAL        0                       0
+Result
+occupation  AVG(workhour)
+----------  -------------
+Business    10.0
+Engineer    12.0
 ```
 
 ```sql
-select id,value1,
-    case
-        when value1 > 50 then 'High'
-        else 'Low'
-    end as value_category
-from Calculations;
+SELECT
+  occupation,
+  AVG(workhour) AS "AVG(workhour)"
+FROM
+  employee1
+GROUP BY
+  occupation
+HAVING
+  AVG(workhour) BETWEEN 10 AND 12;
 ```
 
 **Output:**
 
-<img width="778" height="247" alt="509094042-8c290305-6058-49d8-99b7-4ae62768800e" src="https://github.com/user-attachments/assets/c9b38be4-ccd0-4c4e-9514-4f085fb645ec" />
+<img width="753" height="387" alt="509679811-f8038c39-ebd7-4fbb-84fd-608829951be1" src="https://github.com/user-attachments/assets/5fc6ef29-2557-42c3-9741-5c9a2df74dce" />
+
 
 
 ## RESULT
-Thus, the SQL queries to implement DML commands have been executed successfully.
+Thus, the SQL queries to implement aggregate functions, GROUP BY, and HAVING clause have been executed successfully.
+# Experiment 4: Aggregate Functions, Group By and Having Clause
+
+## AIM
+To study and implement aggregate functions, GROUP BY, and HAVING clause with suitable examples.
+
+## THEORY
+
+### Aggregate Functions
+These perform calculations on a set of values and return a single value.
+
+- **MIN()** – Smallest value  
+- **MAX()** – Largest value  
+- **COUNT()** – Number of rows  
+- **SUM()** – Total of values  
+- **AVG()** – Average of values
+
+**Syntax:**
+```sql
+SELECT AGG_FUNC(column_name) FROM table_name WHERE condition;
+```
+### GROUP BY
+Groups records with the same values in specified columns.
+**Syntax:**
+```sql
+SELECT column_name, AGG_FUNC(column_name)
+FROM table_name
+GROUP BY column_name;
+```
+### HAVING
+Filters the grouped records based on aggregate conditions.
+**Syntax:**
+```sql
+SELECT column_name, AGG_FUNC(column_name)
+FROM table_name
+GROUP BY column_name
+HAVING condition;
+```
+
+**Question 1**
+--
+What is the average dosage prescribed for each medication?
+
+Sample tablePrescriptions Table
+```
+Medication     AvgDosage
+-------------  ----------
+Ciprofloxacin  500.0
+Doxorubicin    60.0
+Ibuprofen      400.0
+Levothyroxine  50.0
+Lisinopril     10.0
+MMR            0.5
+Pending        0.0
+Prenatal vita  1.0
+Sertraline     50.0
+Topiramate     25.0
+```
+
+```sql
+SELECT
+  Medication,
+  AVG(Dosage) AS AvgDosage
+FROM
+  Prescriptions
+GROUP BY
+  Medication;
+
+```
+
+**Output:**
+
+<img width="695" height="742" alt="509667812-c347673f-5e6b-4e9d-b49e-196071e39b1d" src="https://github.com/user-attachments/assets/6e06c884-12ab-42ce-a026-1a0c57fc004f" />
+
+
+**Question 2**
+---
+How many patients are there in each city?
+
+Sample table: Patients Table
+```
+Address     TotalPatients
+----------  -------------
+Berlin      3
+Chicago     4
+Mexico      3
+```
+
+```sql
+select Address,count(*)
+as TotalPatients
+from Patients
+group by Address
+```
+
+**Output:**
+
+
+<img width="658" height="392" alt="509670333-848773cb-0780-4263-aa5e-36616d7f2f90" src="https://github.com/user-attachments/assets/8e7297ee-0aac-45b9-ba63-a3fe65e854fd" />
+
+**Question 3**
+---
+Write a SQL Query to find how many medications are prescribed for each patient?
+
+Sample table:MedicalRecords Table
+```
+
+PatientID   AvgMedications
+----------  --------------
+4           5
+6           1
+7           1
+8           3
+```
+
+
+```sql
+SELECT PatientID,COUNT(*) AS 
+AvgMedications
+FROM MedicalRecords
+GROUP BY PatientID;
+```
+
+**Output:**
+
+
+<img width="677" height="612" alt="509671105-474f243d-b382-4cbc-8830-747a33d7c330" src="https://github.com/user-attachments/assets/eaa5b284-a857-4f11-8573-391523c485cc" />
+
+**Question 4**
+---
+Write a SQL query to find the maximum purchase amount.
+
+Sample table: orders
+```
+ord_no      purch_amt   ord_date    customer_id  salesman_id
+
+----------  ----------  ----------  -----------  -----------
+
+70001       150.5       2012-10-05  3005         5002
+
+70009       270.65      2012-09-10  3001         5005
+
+70002       65.26       2012-10-05  3002         5001
+```
+
+```sql
+SELECT
+  MAX(purch_amt) AS MAXIMUM
+FROM
+  orders;
+```
+
+**Output:**
+
+<img width="403" height="297" alt="509672004-39fa51d7-2e95-48f2-a7eb-50586ad8eec0" src="https://github.com/user-attachments/assets/03c49cea-68fe-4de8-9d42-22d287813c3d" />
+
+
+**Question 5**
+---
+Write a SQL query to find the total income of employees aged 40 or above.
+
+Table: employee
+```
+name        type
+----------  ----------
+id          INTEGER
+name        TEXT
+age         INTEGER
+city        TEXT
+income      INTEGER
+```
+
+```sql
+SELECT
+  SUM(income) AS total_income
+FROM
+  employee
+WHERE
+  age >= 40;
+```
+
+**Output:**
+
+
+<img width="437" height="311" alt="509672942-05a9c241-b52b-4c65-873e-b560f079b47a" src="https://github.com/user-attachments/assets/29a8333a-22fd-4303-b110-aabb4c3e93b6" />
+
+**Question 6**
+---
+Write a SQL query to find the number of employees whose age is greater than 32.
+
+```sql
+SELECT
+  COUNT(*) AS COUNT
+FROM
+  employee
+WHERE
+  age > 32;
+```
+
+**Output:**
+
+<img width="435" height="316" alt="509673946-c93b4873-45af-4fdd-934e-699dd60730de" src="https://github.com/user-attachments/assets/75b90c54-0e80-4111-8aad-4dc06084c423" />
+
+
+**Question 7**
+---
+Write a SQL query to find the average length of names for people living in Chennai?
+
+Table: customer
+```
+name        type
+----------  ----------
+id          INTEGER
+name        TEXT   
+city        TEXT
+email       TEXT
+phone       INTEGER
+```
+
+```sql
+SELECT
+  AVG(LENGTH(name)) AS avg_name_length
+FROM
+  customer
+WHERE
+  city = 'Chennai';
+```
+
+**Output:**
+
+<img width="438" height="295" alt="509675119-043bd99b-a9d2-4bba-bb82-76daf0a1684d" src="https://github.com/user-attachments/assets/fce31658-ae0a-4c08-a6fb-c932c5f3b057" />
+
+
+**Question 8**
+---
+Write the SQL query that accomplishes the grouping of data by joining date (jdate), calculates the maximum work hours for each date, and excludes dates where the maximum work hour is not greater than 12.
+
+Sample table: employee1
+```
+jdate       MAX(workhour)
+----------  -------------
+2004.0      15
+2006.0      15
+```
+
+```sql
+SELECT
+  jdate,
+  MAX(workhour) AS "MAX(workhour)"
+FROM
+  employee1
+GROUP BY
+  jdate
+HAVING
+  MAX(workhour) > 12;
+```
+
+**Output:**
+
+<img width="670" height="377" alt="509676408-d190c7b4-dbda-44de-a3bc-94c9ccdecf51" src="https://github.com/user-attachments/assets/07945bc4-bd3c-4f09-9e16-3e786b3c3066" />
+
+
+**Question 9**
+---
+Write the SQL query that achieves the grouping of data by occupation, calculates the total work hours for each occupation, and excludes occupations where the total work hour sum is not greater than 20.
+
+Sample table: employee1
+```
+occupation  SUM(workhour)
+----------  -------------
+Business    30
+Doctor      30
+Engineer    24
+Teacher     27
+```
+
+```sql
+SELECT
+  occupation,
+  SUM(workhour) AS "SUM(workhour)"
+FROM
+  employee1
+GROUP BY
+  occupation
+HAVING
+  SUM(workhour) > 20;
+```
+
+**Output:**
+
+<img width="616" height="437" alt="509678788-901be72e-8384-4d00-92f0-fc707bfdd8ef" src="https://github.com/user-attachments/assets/f238840f-bccb-482f-a0f5-5cc7d8f84186" />
+
+
+
+**Question 10**
+---
+Write the SQL query that achieves the grouping of data by occupation, calculates the average work hours for each occupation, and includes only those occupations where the average work hour falls between 10 and 12.
+
+Sample table: employee1
+```
+Result
+occupation  AVG(workhour)
+----------  -------------
+Business    10.0
+Engineer    12.0
+```
+
+```sql
+SELECT
+  occupation,
+  AVG(workhour) AS "AVG(workhour)"
+FROM
+  employee1
+GROUP BY
+  occupation
+HAVING
+  AVG(workhour) BETWEEN 10 AND 12;
+```
+
+**Output:**
+
+<img width="753" height="387" alt="509679811-f8038c39-ebd7-4fbb-84fd-608829951be1" src="https://github.com/user-attachments/assets/5fc6ef29-2557-42c3-9741-5c9a2df74dce" />
+
+
+
+## RESULT
+Thus, the SQL queries to implement aggregate functions, GROUP BY, and HAVING clause have been executed successfully.
